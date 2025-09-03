@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黑洞AI演员画像匹配短剧分析系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            animation: slideDown 0.6s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .actor-profile {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2em;
+            margin-right: 25px;
+        }
+
+        .profile-info h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .analysis-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 1s ease 0.4s both;
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .genre-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .genre-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .genre-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .genre-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .genre-card:hover::before {
+            top: -100%;
+            right: -100%;
+        }
+
+        .genre-name {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .match-score {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .recommendation {
+            font-size: 0.95em;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        .potential-chart {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 25px;
+        }
+
+        .chart-title {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .chart-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bar-label {
+            min-width: 120px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 35px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            animation: growBar 1.5s ease;
+        }
+
+        @keyframes growBar {
+            from {
+                width: 0;
+            }
+        }
+
+        .predictions {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 1.2s ease 0.6s both;
+        }
+
+        .prediction-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .prediction-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .prediction-rank {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .prediction-content {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .prediction-title {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .prediction-desc {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .prediction-metrics {
+            text-align: right;
+        }
+
+        .metric-value {
+            color: #667eea;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .metric-label {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .genre-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .stats {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 黑洞AI演员画像智能匹配系统</h1>
+            <p class="subtitle">基于大数据分析的短剧爆款预测平台</p>
+        </header>
+
+        <div class="actor-profile">
+            <div class="profile-header">
+                <div class="avatar">小雨</div>
+                <div class="profile-info">
+                    <h2>小雨老师</h2>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">抖音粉丝</span>
+                            <span class="stat-value">1000万+</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">总点赞量</span>
+                            <span class="stat-value">5900万+</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">短剧作品数量</span>
+                            <span class="stat-value">31部+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-tags">
+                <span class="tag">短剧创作者</span>
+                <span class="tag">千万粉丝博主</span>
+                <span class="tag">家庭题材专家</span>
+                <span class="tag">女性视角</span>
+                <span class="tag">情感共鸣</span>
+                <span class="tag">爆款制造者</span>
+                <span class="tag">多元化演绎</span>
+            </div>
+        </div>
+
+        <div class="analysis-section">
+            <h2 class="section-title">📊 演员画像匹配分析</h2>
+            
+            <div class="genre-cards">
+                <div class="genre-card">
+                    <div class="genre-name">💕 家庭伦理爽剧</div>
+                    <div class="match-score">95%</div>
+                    <div class="recommendation">
+                        高度契合！气质温和中有力量、形象百变，能够完美演绎现代女性的多面性，极易引发女性观众共鸣
+                    </div>
+                </div>
+                
+                <div class="genre-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="genre-name">👗 时尚职场剧</div>
+                    <div class="match-score">92%</div>
+                    <div class="recommendation">
+                        服装设计专业背景+时尚敏感度，可真实演绎职场精英女性，专业度高，说服力强
+                    </div>
+                </div>
+                
+                <div class="genre-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <div class="genre-name">🎭 情感治愈剧</div>
+                    <div class="match-score">88%</div>
+                    <div class="recommendation">
+                        擅长情感表达，音乐才艺加分，能够深入人心地演绎治愈系角色，触动观众内心
+                    </div>
+                </div>
+                
+                <div class="genre-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                    <div class="genre-name">🏰 古装仙侠剧</div>
+                    <div class="match-score">75%</div>
+                    <div class="recommendation">
+                        颜值优势明显，气质出众，但需要加强古装造型适配度，可尝试轻古装甜宠向
+                    </div>
+                </div>
+            </div>
+
+            <div class="potential-chart">
+                <h3 class="chart-title">各类型短剧爆款潜力指数</h3>
+                <div class="chart-bars">
+                    <div class="bar-item">
+                        <span class="bar-label">霸总甜宠</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 95%;">95%</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">都市情感</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 90%;">90%</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">职场逆袭</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 85%;">85%</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">家庭伦理</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 70%;">70%</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">悬疑推理</span>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: 60%;">60%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="predictions">
+            <h2 class="section-title">🚀 爆款预测排行榜</h2>
+            
+            <div class="prediction-list">
+                <div class="prediction-item">
+                    <div class="prediction-rank">1</div>
+                    <div class="prediction-content">
+                        <div class="prediction-title">《全职妈妈的百变人生》</div>
+                        <div class="prediction-desc">家庭主妇×职业挑战 | 家庭爽文 | 双重受众共鸣</div>
+                    </div>
+                    <div class="prediction-metrics">
+                        <div class="metric-value">6.5亿</div>
+                        <div class="metric-label">预估总播放量</div>
+                    </div>
+                </div>
+                
+                <div class="prediction-item">
+                    <div class="prediction-rank">2</div>
+                    <div class="prediction-content">
+                        <div class="prediction-title">《总裁的贴身女秘书》</div>
+                        <div class="prediction-desc">霸道总裁×职场新人 | 甜宠+职场双buff | 预计单集播放量破亿</div>
+                    </div>
+                    <div class="prediction-metrics">
+                        <div class="metric-value">5.2亿</div>
+                        <div class="metric-label">预估总播放量</div>
+                    </div>
+                </div>
+                
+                <div class="prediction-item">
+                    <div class="prediction-rank">3</div>
+                    <div class="prediction-content">
+                        <div class="prediction-title">《重生之时尚女王》</div>
+                        <div class="prediction-desc">重生逆袭×时尚圈 | 爽文改编 | 女性向精准定位</div>
+                    </div>
+                    <div class="prediction-metrics">
+                        <div class="metric-value">3.8亿</div>
+                        <div class="metric-label">预估总播放量</div>
+                    </div>
+                </div>
+                
+                <div class="prediction-item">
+                    <div class="prediction-rank">4</div>
+                    <div class="prediction-content">
+                        <div class="prediction-title">《离婚后我成了前夫白月光》</div>
+                        <div class="prediction-desc">虐恋情深×破镜重圆 | 情感共鸣强 | 中年女性市场</div>
+                    </div>
+                    <div class="prediction-metrics">
+                        <div class="metric-value">2.5亿</div>
+                        <div class="metric-label">预估总播放量</div>
+                    </div>
+                </div>
+                
+                <div class="prediction-item">
+                    <div class="prediction-rank">5</div>
+                    <div class="prediction-content">
+                        <div class="prediction-title">《闺蜜变情敌》</div>
+                        <div class="prediction-desc">友情×爱情冲突 | 现实题材 | 话题性强</div>
+                    </div>
+                    <div class="prediction-metrics">
+                        <div class="metric-value">1.8亿</div>
+                        <div class="metric-label">预估总播放量</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 点击卡片显示详细信息
+            const genreCards = document.querySelectorAll('.genre-card');
+            genreCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const score = this.querySelector('.match-score').textContent;
+                    const genre = this.querySelector('.genre-name').textContent;
+                    console.log(`类型: ${genre}, 匹配度: ${score}`);
+                });
+            });
+
+            // 动态加载动画
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // 预测项悬停效果
+            const predictionItems = document.querySelectorAll('.prediction-item');
+            predictionItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    this.style.color = 'white';
+                    this.querySelectorAll('.prediction-title, .prediction-desc, .metric-label').forEach(el => {
+                        el.style.color = 'white';
+                    });
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+                    this.style.color = '';
+                    this.querySelectorAll('.prediction-title, .prediction-desc, .metric-label').forEach(el => {
+                        el.style.color = '';
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
